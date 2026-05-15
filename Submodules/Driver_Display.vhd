@@ -34,8 +34,8 @@ begin
     
     -- Selector de display
     
-    Selector_Dp: process (Clk) begin
-        if rising_edge(Clk) then
+    Selector_Dp: process (Clk, Ctls(0)) begin
+        if rising_edge(Clk) and (Ctls(0) = '1') then
             if    Dp = "00" then Dp <= "01";
             elsif Dp = "01" then Dp <= "10";
             elsif Dp = "10" then Dp <= "11";
@@ -49,9 +49,9 @@ begin
             B    when Aux = "10" else
             Outs when Aux = "11";
     
-    Name <= "1011111" when Aux = "01" else -- 'a'
-            "1111100" when Aux = "10" else -- 'b'
-            "1011100" when Aux = "11";     -- 'o'
+    Name <= "0100000" when Aux = "01" else -- 'a'
+            "0000011" when Aux = "10" else -- 'b'
+            "0100011" when Aux = "11";     -- 'o'
     
     Sig(6) <= not(Var(3));
     

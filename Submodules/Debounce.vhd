@@ -11,19 +11,18 @@ entity Debounce is Port(
 
 architecture Behavioral of Debounce is
     
-    signal Count: integer range 0 to 19 := 0;
+    signal Count: integer range 0 to 31 := 0;
     
 begin
     
-    process (Clk, Btn) begin
+    process (Clk, Btn, Count) begin
         if Btn = '0' then
             Count <= 0;
-        elsif rising_edge(Clk) and Count < 19 then
+        elsif rising_edge(Clk) and Count < 31 then
             Count <= Count + 1;
         end if;
     end process;
     
-    Data <= '1' when Count = 19 else
-            '0' when not(Count = 19);
+    Data <= '1' when Count = 31 else '0';
     
 end Behavioral;

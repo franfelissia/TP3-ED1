@@ -8,9 +8,12 @@ entity Main is
         A:    in  std_logic_vector(3 downto 0);
         B:    in  std_logic_vector(3 downto 0);
         Btns: in  std_logic_vector(4 downto 0);
-        LEDs: out std_logic_vector(9 downto 0);
+        Ctls: out std_logic_vector(3 downto 0);
+        Outs: out std_logic_vector(3 downto 0);
         Cato: out std_logic_vector(6 downto 0);
-        Anod: out std_logic_vector(3 downto 0)
+        Anod: out std_logic_vector(3 downto 0);
+        Carry: out std_logic;
+        OFlow: out std_logic
     );
 end Main;
 
@@ -49,19 +52,20 @@ architecture Schematical of Main is
         );
     end component;
     
-    signal Clk, Carry, OFlow: std_logic;
-    signal Outs:              std_logic_vector(3 downto 0);
-    signal Ctls:              std_logic_vector(4 downto 0);
+    signal Clk:     std_logic;
+    signal OutsAux: std_logic_vector(3 downto 0);
+    signal CtlsAux: std_logic_vector(4 downto 0);
     
 begin
     
-    leds <= (ctls(3 downto 0) & oFlow & carry & outs);
+    Ctls <= CtlsAux (3 downto 0);
+    Outs <= OutsAux;
     
     ALU_c: ALU port map(
         A     => A,
         B     => B,
-        Ctls  => Ctls(3 downto 0),
-        Outs  => Outs,
+        Ctls  => CtlsAux(3 downto 0),
+        Outs  => OutsAux,
         Carry => Carry,
         OFlow => OFlow
     );
@@ -74,14 +78,14 @@ begin
     Driver_Btns_c: Driver_Btns port map (
         Clk   => Clk,
         Btns  => Btns,
-        Ctls  => Ctls
+        Ctls  => CtlsAux
     );
     
     Driver_Display_c: Driver_Display port map (
         A     => A,
         B     => B,
-        Outs  => Outs,
-        Ctls  => Ctls(4 downto 3),
+        Outs  => OutsAux,
+        Ctls  => CtlsAux(4 downto 3),
         Clk   => Clk,
         Cato  => Cato,
         Anod  => Anod

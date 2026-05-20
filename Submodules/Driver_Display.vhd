@@ -19,13 +19,15 @@ architecture DataFlow of Driver_Display is
     signal Var:            std_logic_vector(3 downto 0) := "0000";
     signal Aux:            std_logic_vector(1 downto 0) := "11";
     signal Dp:             std_logic_vector(1 downto 0) := "11";
+    signal CatoAux:        std_logic_vector(6 downto 0);
+    signal AnodAux:        std_logic_vector(3 downto 0);
 
 begin
     
     -- Selector de variable a mostrar
     
     Selector_Var: process (Ctls(1)) begin
-        if rising_edge(Ctls(1)) then           -- Cambio de variable.
+        if rising_edge(Ctls(1)) and (Ctls(0) = '1') then
             if    Aux = "01" then Aux <= "10";
             elsif Aux = "10" then Aux <= "11";
             elsif Aux = "11" then Aux <= "01";
@@ -34,8 +36,8 @@ begin
     
     -- Selector de display
     
-    Selector_Dp: process (Clk, Ctls(0)) begin
-        if rising_edge(Clk) and (Ctls(0) = '1') then
+    Selector_Dp: process (Clk) begin
+        if rising_edge(Clk) then
             if    Dp = "00" then Dp <= "01";
             elsif Dp = "01" then Dp <= "10";
             elsif Dp = "10" then Dp <= "11";
@@ -45,13 +47,17 @@ begin
     
     -- Asignaciones
     
-    Var  <= A    when Aux = "01" else
-            B    when Aux = "10" else
-            Outs when Aux = "11";
+    with Aux select Var  <=
+        A      when "01",
+        B      when "10",
+        Outs   when "11",
+        "0000" when others;
     
-    Name <= "0100000" when Aux = "01" else -- 'a'
-            "0000011" when Aux = "10" else -- 'b'
-            "0100011" when Aux = "11";     -- 'o'
+    with Aux select Name <=
+        "0100000" when "01", -- 'a'
+        "0000011" when "10", -- 'b'
+        "0100011" when "11", -- 'o'
+        "-------" when others;
     
     Sig(6) <= not(Var(3));
     
@@ -77,16 +83,20 @@ begin
         "1111001" when "1111",
         "1111111" when others;
     
-    Cato <= "1111111" when Ctls(0) = '0'  else
-            Dig       when Dp =      "00" else
-            Sig       when Dp =      "01" else
-            "0110111" when Dp =      "10" else
-            Name      when Dp =      "11";
+    with Dp select CatoAux <=
+        Dig       when "00",
+        Sig       when "01",
+        "0110111" when "10",
+        Name      when others;
             
-    Anod <= "1111" when Ctls(0) = '0'  else
-            "1110" when Dp =      "00" else
-            "1101" when Dp =      "01" else
-            "1011" when Dp =      "10" else
-            "0111" when Dp =      "11";
+    with Dp select AnodAux <=
+        "1110"    when "00",
+        "1101"    when "01",
+        "1011"    when "10",
+        "0111"    when others;
+    
+    Cato <= CatoAux or not (Ctls(0) & Ctls(0) & Ctls(0) & Ctls(0) & Ctls(0) & Ctls(0) & Ctls(0));
+    
+    Anod <= AnodAux or not (Ctls(0) & Ctls(0) & Ctls(0) & Ctls(0));
 
 end DataFlow;
